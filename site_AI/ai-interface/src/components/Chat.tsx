@@ -2,11 +2,12 @@
 import { useState, useEffect } from 'react';
 // Убираем статический импорт
 // import io from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 
 export default function Chat() {
   const [messages, setMessages] = useState<string[]>([]);
   const [input, setInput] = useState('');
-  const [socket, setSocket] = useState<any>(null);
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
     // Динамический импорт только на клиенте

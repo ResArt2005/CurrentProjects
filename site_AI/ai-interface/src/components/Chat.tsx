@@ -1,16 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
-// Убираем статический импорт
-// import io from 'socket.io-client';
 import type { Socket } from 'socket.io-client';
+import styles from '../app/styles/page.module.css';
 
-export default function Chat() {
+export default function Chat({ className }: { className?: string }) {
   const [messages, setMessages] = useState<string[]>([]);
   const [input, setInput] = useState('');
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    // Динамический импорт только на клиенте
     import('socket.io-client').then(({ default: io }) => {
       const newSocket = io('http://localhost:8000');
       setSocket(newSocket);
@@ -26,7 +24,7 @@ export default function Chat() {
   }, []);
 
   const send = () => {
-    if (socket) {
+    if (socket && input.trim()) {
       socket.emit('prompt', input);
       setMessages((prev) => [...prev, '> ' + input]);
       setInput('');
@@ -34,20 +32,29 @@ export default function Chat() {
   };
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="border rounded p-2 h-64 overflow-y-scroll bg-gray-100">
-        {messages.map((msg, i) => (
-          <div key={i} className="text-sm whitespace-pre-wrap">{msg}</div>
-        ))}
+    <div className={className}>
+      <div className={styles['chat-messages']}>
+        {messages.length === 0 ? (
+          <div className={styles['chat-empty']}>Start chatting...</div>
+        ) : (
+          messages.map((msg, i) => (
+            <div key={i} className={styles['chat-message']}>{msg}</div>
+          ))
+        )}
       </div>
-      <div className="flex space-x-2">
+      <div className={styles['chat-input-row']}>
         <input
-          className="flex-1 border rounded px-2 py-1"
+          type="text"
+          className={styles['chat-input']}
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          //onKeyPress={(e) => e.key === 'Enter' && send()}
+          onKeyDown={(e) => e.key === 'Enter' && send()}
+          placeholder="Enter your prompt..."
         />
-        <button onClick={send} className="bg-blue-500 text-white px-4 py-1 rounded">
+        <button
+          onClick={send}
+          className={styles['chat-send']}
+        >
           Send
         </button>
       </div>
